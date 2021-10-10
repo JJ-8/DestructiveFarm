@@ -68,218 +68,245 @@ function setPageNumber(number) {
 var queryInProgress = false;
 
 function showFlags() {
-    if (queryInProgress)
-        return;
-    queryInProgress = true;
+	if (queryInProgress) return;
+	queryInProgress = true;
 
-    $('.search-results').hide();
-    $('.query-status').html(`
+	$(".search-results").hide();
+	$(".query-status")
+		.html(
+			`
         <div class="progress">
             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
         </div>
-    `).show();
+    `
+		)
+		.show();
 
-    $.get('/ui/show_flags?' + $('#show-flags-form').serialize())
-        .done(response => {
-            $('.search-results tbody').html(generateFlagTableRows(response.rows));
+	$.get("/destructivefarm/ui/show_flags?" + $("#show-flags-form").serialize())
+		.done((response) => {
+			$(".search-results tbody").html(
+				generateFlagTableRows(response.rows)
+			);
 
-            $('.search-results .total-count').text(response.total_count);
-            $('.search-results .pagination').html(
-                generatePaginator(response.total_count, response.rows_per_page, getPageNumber())
-            );
-            $('.search-results .page-link').click((event) => {
-                event.preventDefault();
+			$(".search-results .total-count").text(response.total_count);
+			$(".search-results .pagination").html(
+				generatePaginator(
+					response.total_count,
+					response.rows_per_page,
+					getPageNumber()
+				)
+			);
+			$(".search-results .page-link").click((event) => {
+				event.preventDefault();
 
-                setPageNumber($(event.currentTarget).data("content"));
-                showFlags();
-            });
+				setPageNumber($(event.currentTarget).data("content"));
+				showFlags();
+			});
 
-            $('.query-status').hide();
-            $('.search-results').show();
-        })
-        .fail(() => {
-            $('.query-status').html(`
+			$(".query-status").hide();
+			$(".search-results").show();
+		})
+		.fail(() => {
+			$(".query-status").html(`
                 <div class="alert alert-danger" role="alert">
                     Failed to load flags from the farm server
-                </div>`
-            );
-        })
-        .always(() => {
-            queryInProgress = false;
-        });
+                </div>`);
+		})
+		.always(() => {
+			queryInProgress = false;
+		});
 }
 
 function postFlagsManual() {
-    if (queryInProgress)
-        return;
-    queryInProgress = true;
-    $("#post-flags-manual-progress").show()
+	if (queryInProgress) return;
+	queryInProgress = true;
+	$("#post-flags-manual-progress").show();
 
-    $.post('/ui/post_flags_manual', $('#post-flags-manual-form').serialize())
-        .done(() => {
-            var sploitSelect = $('#sploit-select');
-            if ($('#sploit-manual-option').empty())
-                sploitSelect.append($('<option id="sploit-manual-option">Manual</option>'));
-            sploitSelect.val('Manual');
+	$.post(
+		"/destructivefarm/ui/post_flags_manual",
+		$("#post-flags-manual-form").serialize()
+	)
+		.done(() => {
+			var sploitSelect = $("#sploit-select");
+			if ($("#sploit-manual-option").empty())
+				sploitSelect.append(
+					$('<option id="sploit-manual-option">Manual</option>')
+				);
+			sploitSelect.val("Manual");
 
-            $('#team-select, #flag-input, #time-since-input, #time-until-input, ' +
-                '#status-select, #checksystem-response-input').val('');
+			$(
+				"#team-select, #flag-input, #time-since-input, #time-until-input, " +
+					"#status-select, #checksystem-response-input"
+			).val("");
 
-            queryInProgress = false;
-            $("#post-flags-manual-progress").hide();
-            showFlags();
-        })
-        .fail(() => {
-            $('.query-status').html(`
+			queryInProgress = false;
+			$("#post-flags-manual-progress").hide();
+			showFlags();
+		})
+		.fail(() => {
+			$(".query-status").html(`
             <div class="alert alert-danger" role="alert">
                 Failed to post flags to the farm server
             </div>
             `);
 
-            queryInProgress = false;
-            $("#post-flags-manual-progress").hide();
-        });
+			queryInProgress = false;
+			$("#post-flags-manual-progress").hide();
+		});
 }
 
 let GRAPH_CONFIG = {
-    type: 'bar',
-    data: {
-        datasets: [{
-            label: "Totale",
-            type: "line",
+	type: "bar",
+	data: {
+		datasets: [
+			{
+				label: "Totale",
+				type: "line",
 
-            fill: true,
-            borderColor: 'hsla(120, 50%, 50%, 0.6)',
-            backgroundColor: 'hsla(120, 50%, 50%, 0.05)',
-            tension: 0.6,
-            cubicInterpolationMode: "monotone"
-
-        }]
-    },
-    options: {
-        maintainAspectRatio: false,
-        //responsive: true,
-        barThickness: "flex",
-        plugins: {
-            zoom: {
-                zoom: {
-                    enabled: true,
-                    mode: 'x',
-                },
-                pan: {
-                    enabled: true,
-                    mode: "x"
-                },
-                limits: {
-                    x: {
-                        min: 0
-                    },
-                    y: {
-                        min: 0
-                    }
-                }
-            },
-            legend: {
-                position: 'top',
-            },
-            title: {
-                display: false,
-            },
-            tooltip: {
-                enabled: false
-            },
-        },
-        scales: {
-            x: {
-                type: "linear",
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
-                }
-
-            },
-            y: {
-                type: "linear",
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
-                },
-                grace: '10%',
-                //stacked: true,
-            }
-        },
-        elements: {
-            point: {
-                radius: 0,
-            }
-        }
-    },
+				fill: true,
+				borderColor: "hsla(120, 50%, 50%, 0.6)",
+				backgroundColor: "hsla(120, 50%, 50%, 0.05)",
+				tension: 0.6,
+				cubicInterpolationMode: "monotone",
+			},
+		],
+	},
+	options: {
+		maintainAspectRatio: false,
+		//responsive: true,
+		barThickness: "flex",
+		plugins: {
+			zoom: {
+				zoom: {
+					enabled: true,
+					mode: "x",
+				},
+				pan: {
+					enabled: true,
+					mode: "x",
+				},
+				limits: {
+					x: {
+						min: 0,
+					},
+					y: {
+						min: 0,
+					},
+				},
+			},
+			legend: {
+				position: "top",
+			},
+			title: {
+				display: false,
+			},
+			tooltip: {
+				enabled: false,
+			},
+		},
+		scales: {
+			x: {
+				type: "linear",
+				beginAtZero: true,
+				ticks: {
+					stepSize: 1,
+				},
+			},
+			y: {
+				type: "linear",
+				beginAtZero: true,
+				ticks: {
+					stepSize: 1,
+				},
+				grace: "10%",
+				//stacked: true,
+			},
+		},
+		elements: {
+			point: {
+				radius: 0,
+			},
+		},
+	},
 };
 
 var SPLOITS = new Set();
 function updateGraph(chart) {
-    let sse = new EventSource("/api/graphstream")
-    let l_values = []
-    sse.onmessage = (resp) => {
-        let elements = JSON.parse(resp.data);
-        if (elements.length == 0) return;
+	let sse = new EventSource("/destructivefarm/api/graphstream");
+	let l_values = [];
+	sse.onmessage = (resp) => {
+		let elements = JSON.parse(resp.data);
+		if (elements.length == 0) return;
 
+		elements.forEach((elem) => {
+			let cycle = elem["cycle"];
+			let total = 0;
+			for (sploit of new Set([
+				...Object.keys(elem["sploits"]),
+				...SPLOITS,
+			])) {
+				let index = chart.data.datasets.findIndex(
+					(el) => el.label == sploit
+				);
+				let n = elem["sploits"][sploit] || 0;
+				total += n;
+				if (index != -1) {
+					chart.data.datasets[index].data.push({ x: cycle, y: n });
+				} else {
+					SPLOITS.add(sploit);
+					chart.data.datasets.push({
+						type: "bar",
+						borderColor:
+							"hsla(" +
+							(hashCode(sploit) % 360) +
+							", 70%, 50%, 1)",
+						backgroundColor:
+							"hsla(" +
+							(hashCode(sploit) % 360) +
+							", 70%, 50%, 0.5)",
+						borderWidth: 1,
 
-        elements.forEach(elem => {
-            let cycle = elem["cycle"];
-            let total = 0;
-            for (sploit of new Set([...Object.keys(elem["sploits"]), ...SPLOITS])) {
+						label: sploit,
+						data: [{ x: cycle, y: n }],
+					});
+				}
+			}
+			// if (total == 0) return;
 
-                let index = chart.data.datasets.findIndex(el => el.label == sploit);
-                let n = elem["sploits"][sploit] || 0;
-                total += n;
-                if (index != -1) {
-                    chart.data.datasets[index].data.push({ x: cycle, y: n });
-                } else {
-                    SPLOITS.add(sploit);
-                    chart.data.datasets.push({
-                        type: "bar",
-                        borderColor: 'hsla(' + hashCode(sploit) % 360 + ', 70%, 50%, 1)',
-                        backgroundColor: 'hsla(' + hashCode(sploit) % 360 + ', 70%, 50%, 0.5)',
-                        borderWidth: 1,
+			l_values.push(total);
+			let DIM = 3;
+			if (l_values.length > DIM - 1) {
+				l_values.shift();
 
-                        label: sploit,
-                        data: [{ x: cycle, y: n }],
-                    });
-                }
-            }
-            // if (total == 0) return;
+				chart.data.datasets[0].data.push({
+					x: cycle,
+					y: l_values.reduce((a, b) => a + b) / DIM,
+				});
+			}
+		});
 
-            l_values.push(total)
-            let DIM = 3;
-            if (l_values.length > DIM - 1) {
-                l_values.shift()
-
-                chart.data.datasets[0].data.push({ x: cycle, y: l_values.reduce((a, b) => a + b) / DIM });
-            }
-        })
-
-        chart.update()
-    };
+		chart.update();
+	};
 }
 
-function hashCode(str) { // java String#hashCode
-    var hash = 5831;
-    for (var i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return hash;
+function hashCode(str) {
+	// java String#hashCode
+	var hash = 5831;
+	for (var i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	}
+	return hash;
 }
 
 function updateSploitTable() {
-    $.ajax({
-        url: "/api/successful_exploits",
-        type: "GET",
-        success: response => {
-            $("#sploits-table").html(response);
-        },
-        error: xhr => { }
-    });
+	$.ajax({
+		url: "/destructivefarm/api/successful_exploits",
+		type: "GET",
+		success: (response) => {
+			$("#sploits-table").html(response);
+		},
+		error: (xhr) => {},
+	});
 }
 
 $(() => {
