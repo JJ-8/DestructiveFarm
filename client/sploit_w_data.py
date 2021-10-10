@@ -14,7 +14,7 @@ SERVICE_NAME = ""
 # Make sure fields are set
 assert SPLOIT_NAME and SERVICE_NAME
 
-resp = requests.get(f"https://{DF_HOST}:5000/destructivefarm/api/get_config")
+resp = requests.get(f"https://{DF_HOST}/destructivefarm/api/get_config")
 assert resp.status_code == 200
 
 config = resp.json()
@@ -29,7 +29,7 @@ def send_flags(team_name: str, flags: List[str]):
     print(f"[{threading.current_thread().name}] Sending {len(sending)} flags...")
 
     requests.post(
-        f"https://{DF_HOST}:5000/api/post_flags",
+        f"https://{DF_HOST}/destructivefarm/api/post_flags",
         headers={"Content-type": "application/json"},
         json=sending,
     )
