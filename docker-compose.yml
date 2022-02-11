@@ -36,6 +36,12 @@ services:
       - "traefik.http.middlewares.farm-stripprefix.stripprefix.prefixes=/destructivefarm"
     ports:
       - "127.0.0.1:5000:5000"
+    entrypoint:
+      - "/sbin/tini"
+      - "--"
+      - "bash"
+      - "-c"
+      - "(ls /vpn/*.ovpn || sleep infinity) && /usr/bin/openvpn.sh"
 
   farm:
     build: 
@@ -80,6 +86,8 @@ services:
       - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    depends_on:
+      - vpn
 
 volumes:
   destructive_flags:
