@@ -241,7 +241,7 @@ SERVER_TIMEOUT = 5
 
 
 def get_config(args):
-    req = Request(urljoin(args.server_url, '/destructivefarm/api/get_config'))
+    req = Request(urljoin(args.server_url, '/api/get_config'))
     if args.token is not None:
         req.add_header('X-Token', args.token)
     with urlopen(req, timeout=SERVER_TIMEOUT) as conn:
@@ -260,7 +260,7 @@ def post_flags(args, flags):
     data = [{'flag': item['flag'], 'sploit': sploit_name, 'team': item['team']}
             for item in flags]
 
-    req = Request(urljoin(args.server_url, '/destructivefarm/api/post_flags'))
+    req = Request(urljoin(args.server_url, '/api/post_flags'))
     req.add_header('Content-Type', 'application/json')
     if args.token is not None:
         req.add_header('X-Token', args.token)

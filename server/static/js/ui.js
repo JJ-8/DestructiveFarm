@@ -82,7 +82,7 @@ function showFlags() {
 		)
 		.show();
 
-	$.get("/destructivefarm/ui/show_flags?" + $("#show-flags-form").serialize())
+	$.get("/ui/show_flags?" + $("#show-flags-form").serialize())
 		.done((response) => {
 			$(".search-results tbody").html(
 				generateFlagTableRows(response.rows)
@@ -122,10 +122,7 @@ function postFlagsManual() {
 	queryInProgress = true;
 	$("#post-flags-manual-progress").show();
 
-	$.post(
-		"/destructivefarm/ui/post_flags_manual",
-		$("#post-flags-manual-form").serialize()
-	)
+	$.post("/ui/post_flags_manual", $("#post-flags-manual-form").serialize())
 		.done(() => {
 			var sploitSelect = $("#sploit-select");
 			if ($("#sploit-manual-option").empty())
@@ -232,7 +229,7 @@ let GRAPH_CONFIG = {
 
 var SPLOITS = new Set();
 function updateGraph(chart) {
-	let sse = new EventSource("/destructivefarm/api/graphstream");
+	let sse = new EventSource("/api/graphstream");
 	let l_values = [];
 	sse.onmessage = (resp) => {
 		let elements = JSON.parse(resp.data);
@@ -300,7 +297,7 @@ function hashCode(str) {
 
 function updateSploitTable() {
 	$.ajax({
-		url: "/destructivefarm/api/successful_exploits",
+		url: "/api/successful_exploits",
 		type: "GET",
 		success: (response) => {
 			$("#sploits-table").html(response);
