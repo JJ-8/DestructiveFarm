@@ -1,25 +1,85 @@
 version: "3.7"
 
 services:
+  vpn:
+    # This container will setup an openvpn connection to the challenge infra.
+    # We'll proxy any containers that need access to the chals through
+    # this network.
+    image: dperson/openvpn-client
+    # cap_add, security_opt, and volume required for the image to function
+    cap_add:
+      - net_admin
+    networks:
+      - default
+    dns:
+      - 1.1.1.1
+      - 1.0.0.1
+    tmpfs:
+      - /run
+      - /tmp
+    security_opt:
+      - label:disable
+    stdin_open: true
+    tty: true
+    volumes:
+      - /dev/net:/dev/net:z
+    # Put .ovpn configuration file in the /vpn directory
+      - ./workdir/vpn:/vpn
+
+    # Since the farm doesn't have a network stack, but is instead sharing ours, we also
+    # need to handle it's traefik flags for this demo.
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.farm.entrypoints=web"
+      - "traefik.http.routers.farm.rule=PathPrefix(`/destructivefarm{regex:$$|/.*}`)"
+      - "traefik.http.routers.farm.middlewares=farm-stripprefix"
+      - "traefik.http.middlewares.farm-stripprefix.stripprefix.prefixes=/destructivefarm"
+    ports:
+      - "127.0.0.1:5000:5000"
+
   farm:
-    image: ghcr.io/str4ngeb0yz/destructivefarm:slim
     build: 
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      - vpn
     volumes:
       - destructive_flags:/var/server/
-    ports: 
-      - 10.69.42.2:5000:5000
-    
-  # farm_lite:
-  #   image: ghcr.io/str4ngeb0yz/destructivefarm:alpine
-  #   build: 
-  #     context: .
-  #     dockerfile: Dockerfile.alpine
-  #   volumes:
-  #     - destructive_flags:/var/server/
-  #   ports: 
-  #     - 10.69.42.2:5000:5000
+    environment:
+      - SERVER_PASSWORD=changeme
+    network_mode: "service:vpn"
+    # Overwrite the entrypoint to prevent hosting the farm on all interfaces.
+    # Instead, only host on `vpn`, which will resolve to the _INTERNAL_ docker ip address.
+    #
+    # For example: inet 172.31.0.2/16 brd 172.31.255.255 scope global eth0
+    #
+    # The farm will be reachable via the following interfaces:
+    #  - localhost/TCP/5000 -> only accessible to docker host running this docker compose file.
+    #                          (I suspect this is enough for nginx/ctfnote?)
+    #
+    #  - 172.31.0.2/TCP/5000 -> accessible to the docker host and other containers in this file.
+    #
+    #
+    #  Just to be clear, `vpn` is just a dns name that resolves to a docker-internal IP. This
+    #  does not host the web server to the CTF network.
+    entrypoint: ["/opt/venv/bin/python", "-m", "flask", "run", "--host", "vpn", "--with-threads" ]
+
+  # Traefik is just included to match the ctfnote setup, and should
+  # be removed from the docker compose file before merging.
+  # TODO
+  traefik:
+    image: "traefik:v2.5"
+    container_name: "traefik"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
 
 volumes:
   destructive_flags:
