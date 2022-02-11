@@ -88,3 +88,16 @@ The flag spam is not explicitly prohibited in many competitions. Starting from 2
 - On VolgaCTF, flags have a digital signature that the farm can check before sending a flag
 
 To eliminate the negative effect in other cases, the farm server implements the following algorithm. Flags are divided into groups corresponding to *(exploit, team)* pairs. Then the farm sends flags uniformly chosen from all the groups. This way, even if one of the services (or all services of one team) contains many fake flags, they won't spend all your submission quota.
+
+## Submission protocols
+
+It can happen that the submission IP is only available behind a VPN. You can try to connect the docker to the VPN, or you can use your own device as a proxy for the flag submission:
+
+- Make sure to have `GatewayPorts yes` in `/etc/ssh/sshd_config` (in order to bind to the docker network)
+- Start the VPN on your host
+- Start a SSH remote port forwarding from the docker network to your own host (check the docker ip with `ip a`): `ssh -R 172.17.0.1:9987:9987.0.0.1:9987 user@host`
+- Connect the local port with the challenge port `socat tcp-listen:9987,reuseaddr,fork tcp:IP:PORT`
+
+Now any flags posted to the port `9987` on the server will be proxied through your device to the chosen IP and PORT.
+
+If it doesn't work, check any firewall configurations like `ufw`.

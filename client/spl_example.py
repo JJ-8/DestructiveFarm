@@ -5,11 +5,13 @@ import string
 import sys
 import base64
 import re
+import requests
 
 flag_regex = "[a-zA-Z0-9]{31}="
 
 if len(sys.argv) < 2:
     print("Team ip argument is missing!")
+    exit(1)
 
 # this is the host/team ip you are going to attack
 host = sys.argv[1]
