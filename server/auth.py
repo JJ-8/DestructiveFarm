@@ -7,7 +7,7 @@ from server import reloader
 def unauthorized_response():
     return Response(
         response='Could not verify your access level for that URL. '
-        'You have to login with proper credentials. Have you set the DESCTRUCTIVE_FARM_PASSWORD variable in the .env file of CTFNote?',
+        'You have to login with proper credentials. Have you set the SERVER_PASSWORD variable in the .env file?',
         status=401,
         headers={'WWW-Authenticate': 'Basic realm="Login Required"'})
 
