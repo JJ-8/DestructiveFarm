@@ -70,24 +70,5 @@ services:
     #  does not host the web server to the CTF network.
     entrypoint: ["/opt/venv/bin/python", "-m", "flask", "run", "--host", "vpn", "--with-threads" ]
 
-  # Traefik is just included to match the ctfnote setup, and should
-  # be removed from the docker compose file before merging.
-  # TODO
-  traefik:
-    image: "traefik:v2.5"
-    container_name: "traefik"
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-    ports:
-      - "80:80"
-      - "8080:8080"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    depends_on:
-      - vpn
-
 volumes:
   destructive_flags:
